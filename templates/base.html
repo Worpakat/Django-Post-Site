@@ -22,7 +22,12 @@
               {% if user.is_authenticated %}
               <li><a href="/post" class="link">POST</a></li>
               <li><p class="username">{{user.get_username}}</p></li>
-              <li><a href="/login" class="link">LOGOUT</a></li>
+              <li>
+                <form  method="post">
+                  {% csrf_token %}
+                  <input type="submit" class="link" name="logout" value="LOGOUT">
+                </form>
+              </li>
               {% else %}
               <li><a href="/login" class="link">LOGIN</a></li>
               {% endif %}
@@ -32,9 +37,9 @@
       </div>
     </div>
 
-    <div class="content-cta">
+    <section class="content-cta">
         {% block 'content' %}
         {% endblock %}
-    </div>
+    </section>
   </body>
 </html>

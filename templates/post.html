@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block 'content' %}
+
+    {% for msg in messages %}
+        <p>{{msg}}</p>
+    {% endfor %}
+
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %} 
+        {{post_form.as_p}}
+        <input type="submit" name="post_btn" value="POST" />
+    </form>
+
+{% endblock %}

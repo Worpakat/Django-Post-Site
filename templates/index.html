@@ -1,1 +1,12 @@
 {% extends 'base.html' %}
+
+{% block 'content' %}
+
+{% for post in posts %}
+<h3>{{post.title}}</h3>
+<img src="{{post.img.url}}" alt="post_img" style="width: 30em;">
+<p>{{post.description}}</p>
+<p>{{post.owner}}   {{post.publish_date}}</p>
+{% endfor %}
+
+{% endblock %}

@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block 'content' %}
+
+    {% for msg in messages %}
+        <p>{{msg}}</p>
+    {% endfor %}
+    
+    <form method="post">
+    {% csrf_token %} 
+    {{sign_up_form.as_p}}
+    <input type="submit" name="sign_up_btn" value="Sign Up" />
+    </form>
+    <p>Do you have an account, click <a href="/login">here</a> for login.</p>
+
+{% endblock %}
