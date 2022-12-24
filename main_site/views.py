@@ -4,13 +4,17 @@ from django.shortcuts import render, redirect
 from .models import ImgPost 
 from .forms import LoginForm, RegisterationForm,PostForm
 from django.contrib import messages, auth
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Group
+from django.contrib.auth.decorators import login_required, permission_required
 
 def home_page(request):
     
     if request.method == "POST":
-        if "logout" in request.POST: #if 'LOGOUT' btn is clicked... 
-            auth.logout(request)
+        user = request.user 
+        post_is_be_deleted = ImgPost.objects.get(pk=request.POST["post_id"])
+        
+        if user == post_is_be_deleted.owner or user.has_perm("main_site.delete_imgpost"):
+            post_is_be_deleted.delete()
 
     posts = ImgPost.objects.order_by("-publish_date") #Descending ordered by publish_date
     # SOURCE: https://docs.djangoproject.com/en/4.1/ref/models/querysets/#order-by
@@ -42,6 +46,13 @@ def login(request):
 
     return render(request=request, template_name='login.html', context=context)
 
+def logout(request):
+
+    auth.logout(request=request)
+
+    return redirect("home_page")
+
+
 def sign_up(request): #!!!!SIGNUP METHODU DEĞİŞTİRİLECEK: MUHTEMELEN UYGUN Bİ MODELFORM OLAYIYLA YAPILACAK!!!!
 
     if request.method == "POST":
@@ -69,10 +80,14 @@ def sign_up(request): #!!!!SIGNUP METHODU DEĞİŞTİRİLECEK: MUHTEMELEN UYGUN 
                 new_user = User.objects.create_user(
                     username=post_info["username"], 
                     email=post_info["email"],
-                    password=post_info["password1"]
+                    password=post_info["password1"],
                     )
                 new_user.save()
                 auth.login(request=request, user=new_user)
+                
+                default_group = Group.objects.get(name="default")
+                default_group.user_set.add(new_user) #We added new_user to 'default' Group
+                
                 return redirect("/")
         else:
             messages.warning(request=request, message="An error occurred, sign up process is not succesfull.")
@@ -81,6 +96,9 @@ def sign_up(request): #!!!!SIGNUP METHODU DEĞİŞTİRİLECEK: MUHTEMELEN UYGUN 
 
     return render(request=request, template_name='sign_up.html', context={"sign_up_form":sign_up_form})
 
+
+@login_required(login_url="/login")
+@permission_required(perm="main_site.add_imgpost", raise_exception=True)
 def post(request):
 
     if request.method == "POST":

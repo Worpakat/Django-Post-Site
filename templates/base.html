@@ -22,12 +22,7 @@
               {% if user.is_authenticated %}
               <li><a href="/post" class="link">POST</a></li>
               <li><p class="username">{{user.get_username}}</p></li>
-              <li>
-                <form  method="post">
-                  {% csrf_token %}
-                  <input type="submit" class="link" name="logout" value="LOGOUT">
-                </form>
-              </li>
+              <li><a href="/logout" class="link">LOGOUT</a></li>
               {% else %}
               <li><a href="/login" class="link">LOGIN</a></li>
               {% endif %}
