@@ -89,6 +89,5 @@ def post(request):
     else:
         post_form = PostForm()
 
-
     return render(request=request, template_name='post.html', context={"post_form":post_form})
     
