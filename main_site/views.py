@@ -2,7 +2,7 @@
 
 from django.shortcuts import render, redirect
 from .models import ImgPost 
-from .forms import LoginForm, RegisterationForm,PostForm
+from .forms import LoginForm, RegisterationForm, PostForm
 from django.contrib import messages, auth
 from django.contrib.auth.models import User, Group
 from django.contrib.auth.decorators import login_required, permission_required
@@ -52,50 +52,33 @@ def logout(request):
 
     return redirect("home_page")
 
+def sign_up(request): 
 
-def sign_up(request): #!!!!SIGNUP METHODU DEĞİŞTİRİLECEK: MUHTEMELEN UYGUN Bİ MODELFORM OLAYIYLA YAPILACAK!!!!
-
+    sign_up_form = RegisterationForm(request.POST or None)
+    
     if request.method == "POST":
-        
-        sign_up_form = RegisterationForm(request.POST)
 
-        if sign_up_form.is_valid():
+        if sign_up_form.is_valid(): 
             post_info = sign_up_form.cleaned_data
-            user_instantiable = True
-            
-            if post_info["password1"] != post_info["password2"]: #Passwordlar eşleşmiyorsa
-                messages.warning(request=request, message="Passwords aren't matching.")
-                user_instantiable = False
-            
-            if User.objects.filter(email=post_info["email"]).exists(): #Email zaten kayıtlı ise
-                # https://docs.djangoproject.com/en/4.1/ref/models/querysets/#exists
-                messages.warning(request=request, message="This email already used.")
-                user_instantiable = False
 
-            if User.objects.filter(username=post_info["username"]).exists(): #Username zaten kayıtlı ise
-                messages.warning(request=request, message="This username already used.")
-                user_instantiable = False
+            #Fields validation made by clean() method's override in this Form subclass.
+            #'e.g' Like, is it already used.
 
-            if user_instantiable: #Add New User
-                new_user = User.objects.create_user(
-                    username=post_info["username"], 
-                    email=post_info["email"],
-                    password=post_info["password1"],
-                    )
-                new_user.save()
-                auth.login(request=request, user=new_user)
-                
-                default_group = Group.objects.get(name="default")
-                default_group.user_set.add(new_user) #We added new_user to 'default' Group
-                
-                return redirect("/")
-        else:
-            messages.warning(request=request, message="An error occurred, sign up process is not succesfull.")
-    else:
-        sign_up_form = RegisterationForm()
+            new_user = User.objects.create_user(
+                username=post_info["username"], 
+                email=post_info["email"],
+                password=post_info["password1"],
+                )
+            new_user.save()
+
+            auth.login(request=request, user=new_user)
+            
+            default_group = Group.objects.get(name="default")
+            default_group.user_set.add(new_user) #We added new_user to 'default' Group
+            
+            return redirect("/")
 
     return render(request=request, template_name='sign_up.html', context={"sign_up_form":sign_up_form})
-
 
 @login_required(login_url="/login")
 @permission_required(perm="main_site.add_imgpost", raise_exception=True)
