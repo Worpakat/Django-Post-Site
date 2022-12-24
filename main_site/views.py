@@ -2,7 +2,7 @@
 
 from django.shortcuts import render, redirect
 from .models import ImgPost 
-from .forms import LoginForm, RegisterationForm, PostForm
+from .forms import LoginForm, PostForm, SignUpForm
 from django.contrib import messages, auth
 from django.contrib.auth.models import User, Group
 from django.contrib.auth.decorators import login_required, permission_required
@@ -54,22 +54,12 @@ def logout(request):
 
 def sign_up(request): 
 
-    sign_up_form = RegisterationForm(request.POST or None)
+    sign_up_form = SignUpForm(request.POST or None)
     
     if request.method == "POST":
 
         if sign_up_form.is_valid(): 
-            post_info = sign_up_form.cleaned_data
-
-            #Fields validation made by clean() method's override in this Form subclass.
-            #'e.g' Like, is it already used.
-
-            new_user = User.objects.create_user(
-                username=post_info["username"], 
-                email=post_info["email"],
-                password=post_info["password1"],
-                )
-            new_user.save()
+            new_user = sign_up_form.save()
 
             auth.login(request=request, user=new_user)
             
