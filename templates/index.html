@@ -7,6 +7,15 @@
 <img src="{{post.img.url}}" alt="post_img" style="width: 30em;">
 <p>{{post.description}}</p>
 <p>{{post.owner}}   {{post.publish_date}}</p>
+
+{% if user == post.owner or perms.main_site.delete_imgpost %}
+<form method="post">
+    {% csrf_token %}
+    <button type="submit" name="post_id" value="{{post.id}}">DELETE</button>
+    <!-- We don't use input but button because we need to send server which post is be deleted. -->
+</form>
+{% endif %}
+
 {% endfor %}
 
 {% endblock %}

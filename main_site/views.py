@@ -2,15 +2,19 @@
 
 from django.shortcuts import render, redirect
 from .models import ImgPost 
-from .forms import LoginForm, RegisterationForm,PostForm
+from .forms import LoginForm, PostForm, SignUpForm
 from django.contrib import messages, auth
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Group
+from django.contrib.auth.decorators import login_required, permission_required
 
 def home_page(request):
     
     if request.method == "POST":
-        if "logout" in request.POST: #if 'LOGOUT' btn is clicked... 
-            auth.logout(request)
+        user = request.user 
+        post_is_be_deleted = ImgPost.objects.get(pk=request.POST["post_id"])
+        
+        if user == post_is_be_deleted.owner or user.has_perm("main_site.delete_imgpost"):
+            post_is_be_deleted.delete()
 
     posts = ImgPost.objects.order_by("-publish_date") #Descending ordered by publish_date
     # SOURCE: https://docs.djangoproject.com/en/4.1/ref/models/querysets/#order-by
@@ -42,45 +46,32 @@ def login(request):
 
     return render(request=request, template_name='login.html', context=context)
 
-def sign_up(request): #!!!!SIGNUP METHODU DEĞİŞTİRİLECEK: MUHTEMELEN UYGUN Bİ MODELFORM OLAYIYLA YAPILACAK!!!!
+def logout(request):
 
+    auth.logout(request=request)
+
+    return redirect("home_page")
+
+def sign_up(request): 
+
+    sign_up_form = SignUpForm(request.POST or None)
+    
     if request.method == "POST":
-        
-        sign_up_form = RegisterationForm(request.POST)
 
-        if sign_up_form.is_valid():
-            post_info = sign_up_form.cleaned_data
-            user_instantiable = True
+        if sign_up_form.is_valid(): 
+            new_user = sign_up_form.save()
+
+            auth.login(request=request, user=new_user)
             
-            if post_info["password1"] != post_info["password2"]: #Passwordlar eşleşmiyorsa
-                messages.warning(request=request, message="Passwords aren't matching.")
-                user_instantiable = False
+            default_group = Group.objects.get(name="default")
+            default_group.user_set.add(new_user) #We added new_user to 'default' Group
             
-            if User.objects.filter(email=post_info["email"]).exists(): #Email zaten kayıtlı ise
-                # https://docs.djangoproject.com/en/4.1/ref/models/querysets/#exists
-                messages.warning(request=request, message="This email already used.")
-                user_instantiable = False
-
-            if User.objects.filter(username=post_info["username"]).exists(): #Username zaten kayıtlı ise
-                messages.warning(request=request, message="This username already used.")
-                user_instantiable = False
-
-            if user_instantiable: #Add New User
-                new_user = User.objects.create_user(
-                    username=post_info["username"], 
-                    email=post_info["email"],
-                    password=post_info["password1"]
-                    )
-                new_user.save()
-                auth.login(request=request, user=new_user)
-                return redirect("/")
-        else:
-            messages.warning(request=request, message="An error occurred, sign up process is not succesfull.")
-    else:
-        sign_up_form = RegisterationForm()
+            return redirect("/")
 
     return render(request=request, template_name='sign_up.html', context={"sign_up_form":sign_up_form})
 
+@login_required(login_url="/login")
+@permission_required(perm="main_site.add_imgpost", raise_exception=True)
 def post(request):
 
     if request.method == "POST":
