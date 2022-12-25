@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block 'content' %}
+
+    {% for msg in messages %}
+        <p>{{msg}}</p>
+    {% endfor %}
+    
+    <h2>Users List</h2>
+
+    <li>
+        {% for tuple in user_perm_list %}
+        <ul>
+            <p>{{tuple.0}}</p>
+            <form method="post">
+                {% csrf_token %}
+                {% if tuple.1 %}
+                    <button type="submit" name="user_id" value="{{tuple.0.id}}">Ban</button>
+                {% else %}
+                    <button type="submit" name="user_id" value="{{tuple.0.id}}">Remove Ban</button>
+                {% endif %}
+            </form>
+        </ul>
+        {% endfor %}
+    </li>
+
+{% endblock %}
