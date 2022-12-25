@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth.models import User
 from .models import ImgPost
-from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.forms import UserCreationForm, PasswordChangeForm
 
 class LoginForm(forms.Form):
     username = forms.CharField(max_length=64, label="Username")
@@ -28,3 +28,9 @@ class PostForm(forms.ModelForm):
         model = ImgPost
         exclude = ['publish_date', 'owner'] 
     
+
+class PasswordChangeForm(PasswordChangeForm):
+    
+    def clean(self):
+        print("TEST CLEAN")
+        return self.cleaned_data
