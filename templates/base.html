@@ -20,9 +20,9 @@
           <nav>
             <ul class="rcta-list">
               {% if user.is_authenticated %}
-              <li><a href="/post" class="link">POST</a></li>
-              <li><a href="/password_change" class="username">{{user.get_username}}</a></li>
-              <li><a href="/logout" class="link">LOGOUT</a></li>
+                <li><a href="/post" class="link">POST</a></li>
+                <li><a href="/password_change" class="username">{{user.get_username}}</a></li>
+                <li><a href="/logout" class="link">LOGOUT</a></li>
               {% else %}
               <li><a href="/login" class="link">LOGIN</a></li>
               {% endif %}
