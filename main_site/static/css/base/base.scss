@@ -21,6 +21,9 @@ p{
         .left-cta{
             
             display: flex;
+            .logo-anc{
+                text-decoration: none;
+            }
             h1{
                 background: tomato;
                 border-radius: 0.5em;

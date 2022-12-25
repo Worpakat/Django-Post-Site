@@ -2,7 +2,8 @@
 
 from django.shortcuts import render, redirect
 from .models import ImgPost 
-from .forms import LoginForm, PostForm, SignUpForm
+from .forms import LoginForm, PostForm, SignUpForm, PasswordChangeForm
+from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib import messages, auth
 from django.contrib.auth.models import User, Group
 from django.contrib.auth.decorators import login_required, permission_required
@@ -90,4 +91,17 @@ def post(request):
         post_form = PostForm()
 
     return render(request=request, template_name='post.html', context={"post_form":post_form})
-    
+
+@login_required(login_url="/login")
+def password_change(request): 
+
+    pass_change_form = PasswordChangeForm(user=request.user, data=request.POST or None)
+
+    if request.method == "POST":
+
+        if pass_change_form.is_valid(): 
+            pass_change_form.save()
+           
+            messages.info(request,"Your password changed successfully.")
+
+    return render(request=request, template_name='password_change.html', context={"pass_change_form":pass_change_form})
